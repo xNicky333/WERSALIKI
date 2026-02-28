@@ -31,16 +31,23 @@ body{
     font-size: 500%;
 
 }
-.link_yt{
-    width: 560px;
-    height: 400px;
-    background: #111827; /* ciemne tło */
-    border-radius: 15px;  /* zaokrąglenie */
-    overflow: hidden;     /* żeby iframe nie wychodził */
+.container {
+    display: flex;            /* włącza flexbox */
+    justify-content: center;  /* wyrównuje divy na środku poziomo */
+    gap: 20px;                /* odstęp między divami */
+    flex-wrap: wrap;          /* zawijanie na małych ekranach */
+}
+
+.link_yt {
+    width: 600px;          /* rośnie, kurczy się, min. szerokość */
+    height: 450px;
+    background: #111827;
+    border-radius: 15px;
+    overflow: hidden;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    float: left;
-    margin-right: 5px;
+    margin: 10px 0;     
+    flex: none;     
 }
 
 .link_yt:hover {
@@ -55,14 +62,22 @@ body{
 .tytul {
     padding: 15px 0;
     text-align: center;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
 
-    color: #facc15;
-    background: linear-gradient(90deg, #0f172a, #1e293b);
+    /* Kolor tekstu delikatny, pasujący do gradientu strony */
+    color: #ffffff;
+    
+    /* Subtelny gradient tła nagłówka */
+    background: linear-gradient(135deg, #1e1e2f, #4b6cb7);
+    
+    /* Zaokrąglone rogi tylko na górze */
     border-radius: 15px 15px 0 0;
 
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
-    text-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+    /* Lekki cień pod nagłówkiem */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    
+    /* Delikatny cień tekstu, ale bardziej elegancki niż żółty */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
