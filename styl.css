@@ -26,10 +26,8 @@ body{
     align-items: center;     /* opcjonalnie wyśrodkowanie */
 }
 
-.mid #linki {
-    margin-top: 5px;
-    font-size: 500%;
-
+#linki{
+    font-size: 100px;
 }
 .container { /* zawiera linki do yt*/
     display: flex;            /* włącza flexbox */
@@ -97,8 +95,8 @@ body{
         width: 45%;
     }
 
-    .mid #linki{
-        font-size: 500%;
+    #linki{
+        font-size: 100px;
     }
 
     .iframe{
@@ -125,8 +123,8 @@ body{
         width: 80%;
     }
 
-    .mid #linki{
-        font-size: 500%;
+    #linki{
+        font-size: 100px;
     }
 
     .tytul{
@@ -151,8 +149,8 @@ body{
         width: 95%;
     }
 
-    .mid #linki{
-        font-size: 180%;
+    #linki{
+        font-size: 100px;
     }
 
     .tytul{
