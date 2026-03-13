@@ -98,6 +98,9 @@ body{
         font-size: 350%;
     }
 
+    .iframe{
+        width: 80%;
+    }
 }
 
 
@@ -126,6 +129,9 @@ body{
         font-size: 18px;
     }
 
+    .iframe{
+        width: 80%;
+    }
 }
 
 
@@ -149,4 +155,7 @@ body{
         padding: 10px 0;
     }
 
+    .iframe{
+        width: 80%;
+    }
 }
