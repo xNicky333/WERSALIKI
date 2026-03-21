@@ -1,161 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    margin: 0;
-    padding: 0;
-    color: white;
-
-    background: radial-gradient(circle at center, #1a1a1a, #000 80%);
-    text-align: center;
-}
-
-.mid{ /* logo i zakładka informacyjna - wyśrodkowanie */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-#foto{ /* logo wersalików */
-    width: 30%;
-    height: 15%;
-
-}
-#info { /* główna zakładka informacyjna */
-    display: flex;
-    flex-direction: column; /* ustawia elementy pod sobą */
-    align-items: center;     /* opcjonalnie wyśrodkowanie */
-}
-
-#linki {
-    display: flex;
-    flex-direction: column; /* jeden pod drugim */
-    gap: 12px;
-    max-width: 300px;
-    margin: 20px auto;
-    width: 300px;
-}
-
-.link-item a {
-    display: block;
-    padding: 12px;
-    text-align: center;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-    text-decoration: none;
-    border-radius: 10px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.link-item a i {
-    margin-right: 8px;
-}
-
-.link-item a:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #5a0fb0, #1f63d1);
-}
-
-.container { /* zawiera linki do yt*/
-    display: flex;            /* włącza flexbox */
-    justify-content: center;  /* wyrównuje divy na środku poziomo */
-    gap: 20px;                /* odstęp między divami */
-    flex-wrap: wrap;          /* zawijanie na małych ekranach */
-}
-
-#frame {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-}
-
-.link_yt {
-    width: 300px;              /* stała szerokość, łatwo kontrolować */
-    height: 200px;             /* większa wysokość, żeby wszystko się zmieściło */
-    background: #111827;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    color: #fff;
-    text-align: center;
-    padding: 10px;
+    min-height: 100vh;
+    padding: 3rem 1.5rem;
+    
+    /* --- CIEMNO-FIOLETOWE TŁO --- */
+    background: radial-gradient(circle at top, #2b0b3f, #0d001a);
 }
 
-.link_yt:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+.mid, .container, .kawa { width: 100%; max-width: 600px; text-align: center; }
+
+#foto {
+    width: 100%; max-width: 180px;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 15px rgba(255, 0, 128, 0.3)); /* Delikatna różowa poświata pod logo */
+    transition: transform 0.3s ease;
+}
+#foto:hover { transform: scale(1.05); }
+
+#info h1 {
+    font-size: 1.1rem; font-weight: 400; color: #d4a5ff;
+    margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;
 }
 
-.kawa{
-    margin-top: 3%;
-    margin-bottom: 1%;
+/* --- LINKI (CIEMNE Z RÓŻOWYM BLASKIEM) --- */
+#linki { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 3rem; }
+
+.link-item a {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    background: #170524; /* Bardzo ciemny fiolet */
+    border: 2px solid #3d1459;
+    border-radius: 12px;
+    color: #ffffff; text-decoration: none; padding: 18px 20px;
+    font-size: 1.1rem; font-weight: 600;
+    transition: all 0.3s ease;
 }
 
-/* RESPONSYWNOŚĆ NA TELEFONY*/
-
-/* ===== TABLET ===== */
-@media (max-width: 1024px) {
-
-    #foto{
-        width: 25%;
-        height: auto;
-    }
-
-    .link_yt{
-        width: 100%;
-    }
-
-
-    .iframe{
-        width: 100%;
-    }
-    .kawa{
-        width: 100%;
-    }
+/* NEONOWY RÓŻ PO NAJECHANIU */
+.link-item a:hover {
+    border-color: #ff007f; /* Jaskrawy róż */
+    color: #ff007f;
+    background: #0d001a;
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 0, 127, 0.4), inset 0 0 10px rgba(255, 0, 127, 0.2);
 }
-/* ===== TELEFON ===== */
-@media (max-width: 768px) {
 
-    #foto{
-        width: 40%;
-        height: auto;
-    }
+.link-item a i { font-size: 1.4rem; }
 
-    .container{
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .link_yt{
-        width: 80%;
-    }
-
-    .iframe{
-        width: 90%;
-    }
-    .kawa{
-        width: 100%;
-    }
+/* --- YOUTUBE I KAWA --- */
+.container { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; }
+.iframe { 
+    width: 100%; border-radius: 10px; border: 1px solid #3d1459;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); 
 }
-/* ===== MAŁY TELEFON ===== */
-@media (max-width: 480px) {
-
-    #foto{
-        width: 55%;
-    }
-
-    .link_yt{
-        width: 80%;
-    }
-
-    .iframe{
-        width: 90%;
-    }
-    .kawa{
-        width: 100%;
-    }
-}
+.kawa { transition: transform 0.3s ease; }
+.kawa:hover { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(255,0,127,0.5)); }
+.kawa img { max-width: 100%; height: auto !important; }
