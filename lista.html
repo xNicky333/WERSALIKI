@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Gier</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        input { padding: 10px; width: 65%; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px; }
+        button:disabled { background-color: #6c757d; }
+        ul { line-height: 1.8; font-size: 18px; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <h2>W co grają Wersaliki?</h2>
+    
+    <input type="text" id="gameInput" placeholder="Np. Minecraft...">
+    <button onclick="addGame()" id="addBtn">Dodaj grę</button>
+    <p id="status" style="color: gray;">Ładowanie listy...</p>
+    
+    <ul id="gameList"></ul>
+
+    <script>
+        // TUTAJ WKLEJ SWÓJ LINK Z GOOGLE APPS SCRIPT (Zaczyna się od https://script.google.com/...)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
+
+        // Funkcja pobierająca gry po wejściu na stronę
+        function loadGames() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(games => {
+                    document.getElementById('status').innerText = '';
+                    const list = document.getElementById('gameList');
+                    list.innerHTML = ''; 
+                    
+                    games.forEach(game => {
+                        let li = document.createElement('li');
+                        li.textContent = game;
+                        list.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('status').innerText = 'Błąd ładowania! Sprawdź link do skryptu.';
+                    console.error(error);
+                });
+        }
+
+        // Funkcja wysyłająca nową grę do Arkusza
+        function addGame() {
+            const input = document.getElementById('gameInput');
+            const btn = document.getElementById('addBtn');
+            const gameName = input.value.trim();
+
+            if (gameName) {
+                btn.disabled = true;
+                btn.innerText = 'Zapisywanie...';
+
+                // Wysyłamy żądanie z nazwą gry
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'game=' + encodeURIComponent(gameName)
+                })
+                .then(response => response.text())
+                .then(() => {
+                    input.value = ''; // Czyszczenie pola po dodaniu
+                    btn.disabled = false;
+                    btn.innerText = 'Dodaj grę';
+                    loadGames(); // Pobranie odświeżonej listy
+                })
+                .catch(error => {
+                    alert('Nie udało się zapisać gry.');
+                    btn.disabled = false;
+                    btn.innerText = 'Dodaj grę';
+                });
+            }
+        }
+
+        // Uruchom ładowanie gier od razu po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', loadGames);
+    </script>
+</body>
+</html>
