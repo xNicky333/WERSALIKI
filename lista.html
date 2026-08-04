@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista Gier</title>
+    <title>Lista Gier - Wersaliki</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
         input { padding: 10px; width: 65%; border: 1px solid #ccc; border-radius: 4px; }
@@ -22,7 +22,7 @@
     <ul id="gameList"></ul>
 
     <script>
-        // TUTAJ WKLEJ SWÓJ LINK Z GOOGLE APPS SCRIPT (Zaczyna się od https://script.google.com/...)
+        // Twój link do Google Apps Script
         const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
 
         // Funkcja pobierająca gry po wejściu na stronę
@@ -77,8 +77,19 @@
             }
         }
 
-        // Uruchom ładowanie gier od razu po załadowaniu strony
-        document.addEventListener('DOMContentLoaded', loadGames);
+        // Konfiguracja uruchamiana zaraz po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGames(); // Ładuje gry na start
+            
+            // DODANE: Obsługa klawisza Enter
+            const inputField = document.getElementById('gameInput');
+            inputField.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Zapobiega dziwnym odświeżeniom strony
+                    addGame(); // Odpala tę samą funkcję co przycisk
+                }
+            });
+        });
     </script>
 </body>
 </html>
