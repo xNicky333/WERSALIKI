@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Gier</title>
+    <link rel="stylesheet" href="styl_listy.css">
+</head>
+<body>
+    <h2>GÓWNO HORRORKI</h2>
+    
+    <input type="text" id="gameInput" placeholder="Nazwa gry (np. Minecraft)">
+    <input type="text" id="commentInput" placeholder="Komentarz (opcjonalnie)">
+    <button onclick="addGame()" id="addBtn">Dodaj grę</button>
+    <p id="status" style="color: gray;">Ładowanie listy...</p>
+    
+    <ul id="gameList"></ul>
+
+    <script>
+        // Link pozostał ten sam
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
+
+        function loadGames() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(games => {
+                    document.getElementById('status').innerText = '';
+                    const list = document.getElementById('gameList');
+                    
+                    let newHTML = ''; 
+                    // Przechodzimy przez każdą grę i dodajemy jej nazwę oraz komentarz
+                    games.forEach(game => {
+                        // Zabezpieczenie przed błędem, gdy ktoś da pusty komentarz
+                        const commentText = game.comment ? ` - <span style="color: #aaa; font-size: 0.9em;">${game.comment}</span>` : '';
+                        newHTML += `<li><strong>${game.name}</strong>${commentText}</li>`;
+                    });
+                    
+                    if(list.innerHTML !== newHTML) {
+                        list.innerHTML = newHTML;
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd odświeżania listy w tle:', error);
+                });
+        }
+
+        function addGame() {
+            const gameInput = document.getElementById('gameInput');
+            const commentInput = document.getElementById('commentInput');
+            const btn = document.getElementById('addBtn');
+            
+            const gameName = gameInput.value.trim();
+            const commentValue = commentInput.value.trim();
+
+            if (gameName) {
+                btn.disabled = true;
+                btn.innerText = 'Zapisywanie...';
+
+                // Łączymy zmienne, aby wysłać grę i komentarz
+                const dataToSend = 'game=' + encodeURIComponent(gameName) + '&comment=' + encodeURIComponent(commentValue);
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: dataToSend
+                })
+                .then(response => response.text())
+                .then(() => {
+                    gameInput.value = ''; 
+                    commentInput.value = ''; // Czyszczenie obu pól
+                    btn.disabled = false;
+                    btn.innerText = 'Dodaj grę';
+                    loadGames(); 
+                })
+                .catch(error => {
+                    alert('Nie udało się zapisać gry.');
+                    btn.disabled = false;
+                    btn.innerText = 'Dodaj grę';
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGames(); 
+            
+            // Obsługa klawisza Enter dla obu pól
+            const inputs = [document.getElementById('gameInput'), document.getElementById('commentInput')];
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        addGame(); 
+                    }
+                });
+            });
+
+            setInterval(loadGames, 10000); 
+        });
+    </script>
+</body>
+</html>
