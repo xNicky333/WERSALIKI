@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista Gier</title>
+    <title>Lista Gier - Wersaliki</title>
     <link rel="stylesheet" href="styl_listy.css">
 </head>
 <body>
     <h2>W co grają Wersaliki?</h2>
     
-    <input type="text" id="gameInput" placeholder="Np. Minecraft...">
+    <input type="text" id="gameInput" placeholder="Nazwa gry (np. Minecraft)">
+    <input type="text" id="commentInput" placeholder="Komentarz (opcjonalnie)">
     <button onclick="addGame()" id="addBtn">Dodaj grę</button>
     <p id="status" style="color: gray;">Ładowanie listy...</p>
     
     <ul id="gameList"></ul>
 
     <script>
-        // Twój link do Google Apps Script
+        // Link pozostał ten sam
         const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
 
-        // Funkcja pobierająca gry po wejściu na stronę
         function loadGames() {
             fetch(API_URL)
                 .then(response => response.json())
@@ -27,46 +27,50 @@
                     document.getElementById('status').innerText = '';
                     const list = document.getElementById('gameList');
                     
-                    // Zapisujemy w pamięci, żeby lista nie mrugała przy odświeżaniu
                     let newHTML = ''; 
+                    // Przechodzimy przez każdą grę i dodajemy jej nazwę oraz komentarz
                     games.forEach(game => {
-                        newHTML += `<li>${game}</li>`;
+                        // Zabezpieczenie przed błędem, gdy ktoś da pusty komentarz
+                        const commentText = game.comment ? ` - <span style="color: #aaa; font-size: 0.9em;">${game.comment}</span>` : '';
+                        newHTML += `<li><strong>${game.name}</strong>${commentText}</li>`;
                     });
                     
-                    // Aktualizuje widok tylko jeśli coś się zmieniło lub ładujemy pierwszy raz
                     if(list.innerHTML !== newHTML) {
                         list.innerHTML = newHTML;
                     }
                 })
                 .catch(error => {
-                    // Żeby nie denerwować użytkowników błędem przy chwilowym braku internetu,
-                    // błąd wyświetli się tylko w konsoli, bez psucia wyglądu strony
                     console.error('Błąd odświeżania listy w tle:', error);
                 });
         }
 
-        // Funkcja wysyłająca nową grę do Arkusza
         function addGame() {
-            const input = document.getElementById('gameInput');
+            const gameInput = document.getElementById('gameInput');
+            const commentInput = document.getElementById('commentInput');
             const btn = document.getElementById('addBtn');
-            const gameName = input.value.trim();
+            
+            const gameName = gameInput.value.trim();
+            const commentValue = commentInput.value.trim();
 
             if (gameName) {
                 btn.disabled = true;
                 btn.innerText = 'Zapisywanie...';
 
-                // Wysyłamy żądanie z nazwą gry
+                // Łączymy zmienne, aby wysłać grę i komentarz
+                const dataToSend = 'game=' + encodeURIComponent(gameName) + '&comment=' + encodeURIComponent(commentValue);
+
                 fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'game=' + encodeURIComponent(gameName)
+                    body: dataToSend
                 })
                 .then(response => response.text())
                 .then(() => {
-                    input.value = ''; // Czyszczenie pola po dodaniu
+                    gameInput.value = ''; 
+                    commentInput.value = ''; // Czyszczenie obu pól
                     btn.disabled = false;
                     btn.innerText = 'Dodaj grę';
-                    loadGames(); // Pobranie odświeżonej listy natychmiast po dodaniu
+                    loadGames(); 
                 })
                 .catch(error => {
                     alert('Nie udało się zapisać gry.');
@@ -76,21 +80,20 @@
             }
         }
 
-        // Konfiguracja uruchamiana zaraz po załadowaniu strony
         document.addEventListener('DOMContentLoaded', () => {
-            loadGames(); // Ładuje gry na start
+            loadGames(); 
             
-            // Obsługa klawisza Enter
-            const inputField = document.getElementById('gameInput');
-            inputField.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Zapobiega dziwnym odświeżeniom strony
-                    addGame(); // Odpala tę samą funkcję co przycisk
-                }
+            // Obsługa klawisza Enter dla obu pól
+            const inputs = [document.getElementById('gameInput'), document.getElementById('commentInput')];
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        addGame(); 
+                    }
+                });
             });
 
-            // DODANE: Automatyczne odświeżanie w tle
-            // 10000 oznacza 10 000 milisekund (czyli 10 sekund)
             setInterval(loadGames, 10000); 
         });
     </script>

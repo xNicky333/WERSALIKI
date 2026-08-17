@@ -26,12 +26,12 @@ h2 {
 }
 
 /* Pole do wpisywania */
-#gameInput {
+#gameInput, #commentInput {
     display: block;
     width: 100%;
     max-width: 400px;
     padding: 12px 16px;
-    background-color: #1e1e1e; /* Lekko jaśniejsze szare tło */
+    background-color: #1e1e1e;
     border: 1px solid #333;
     border-radius: 8px;
     color: #ffffff;
@@ -40,12 +40,11 @@ h2 {
     margin-bottom: 12px;
 }
 
-/* Subtelne podświetlenie po kliknięciu w pole */
-#gameInput:focus {
+#gameInput:focus, #commentInput:focus {
     border-color: #28a745; 
 }
 
-#gameInput::placeholder {
+#gameInput::placeholder, #commentInput::placeholder {
     color: #888888;
 }
 
