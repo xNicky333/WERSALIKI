@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="styl_listy.css">
 </head>
 <body>
-    <h2>W co grają Wersaliki?</h2>
+    <h2>Gówno Horrorki</h2>
     
-    <input type="text" id="gameInput" placeholder="Np. Minecraft...">
-    <button onclick="addGame()" id="addBtn">Dodaj grę</button>
+    <input type="text" id="gameInput" placeholder="Szukaj gry...">
     <p id="status" style="color: gray;">Ładowanie listy...</p>
     
     <ul id="gameList"></ul>
@@ -19,60 +18,46 @@
         // Twój link do Google Apps Script
         const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
 
-        // Funkcja pobierająca gry po wejściu na stronę
+        // Tablica przechowująca wszystkie pobrane gry do lokalnego filtrowania
+        let allGames = [];
+
+        // Funkcja pobierająca gry z serwera
         function loadGames() {
             fetch(API_URL)
                 .then(response => response.json())
                 .then(games => {
                     document.getElementById('status').innerText = '';
-                    const list = document.getElementById('gameList');
-                    
-                    // Zapisujemy w pamięci, żeby lista nie mrugała przy odświeżaniu
-                    let newHTML = ''; 
-                    games.forEach(game => {
-                        newHTML += `<li>${game}</li>`;
-                    });
-                    
-                    // Aktualizuje widok tylko jeśli coś się zmieniło lub ładujemy pierwszy raz
-                    if(list.innerHTML !== newHTML) {
-                        list.innerHTML = newHTML;
-                    }
+                    allGames = games; // Zapisz pobrane gry do zmiennej globalnej
+                    searchGames(); // Zaktualizuj listę (z uwzględnieniem obecnego filtra)
                 })
                 .catch(error => {
-                    // Żeby nie denerwować użytkowników błędem przy chwilowym braku internetu,
-                    // błąd wyświetli się tylko w konsoli, bez psucia wyglądu strony
                     console.error('Błąd odświeżania listy w tle:', error);
                 });
         }
 
-        // Funkcja wysyłająca nową grę do Arkusza
-        function addGame() {
-            const input = document.getElementById('gameInput');
-            const btn = document.getElementById('addBtn');
-            const gameName = input.value.trim();
-
-            if (gameName) {
-                btn.disabled = true;
-                btn.innerText = 'Zapisywanie...';
-
-                // Wysyłamy żądanie z nazwą gry
-                fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'game=' + encodeURIComponent(gameName)
-                })
-                .then(response => response.text())
-                .then(() => {
-                    input.value = ''; // Czyszczenie pola po dodaniu
-                    btn.disabled = false;
-                    btn.innerText = 'Dodaj grę';
-                    loadGames(); // Pobranie odświeżonej listy natychmiast po dodaniu
-                })
-                .catch(error => {
-                    alert('Nie udało się zapisać gry.');
-                    btn.disabled = false;
-                    btn.innerText = 'Dodaj grę';
-                });
+        // Funkcja filtrująca i renderująca gry na stronie
+        function searchGames() {
+            const searchPhrase = document.getElementById('gameInput').value.toLowerCase().trim();
+            const list = document.getElementById('gameList');
+            
+            // Filtrujemy zapisane gry na podstawie wpisanej frazy
+            const filteredGames = allGames.filter(game => 
+                game.toLowerCase().includes(searchPhrase)
+            );
+            
+            let newHTML = ''; 
+            filteredGames.forEach(game => {
+                newHTML += `<li>${game}</li>`;
+            });
+            
+            // Obsługa braku wyników
+            if (filteredGames.length === 0 && searchPhrase !== '') {
+                newHTML = '<li style="color: gray;">Brak gier pasujących do wyszukiwania...</li>';
+            }
+            
+            // Aktualizuje widok tylko jeśli HTML się zmienił
+            if(list.innerHTML !== newHTML) {
+                list.innerHTML = newHTML;
             }
         }
 
@@ -80,17 +65,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadGames(); // Ładuje gry na start
             
-            // Obsługa klawisza Enter
             const inputField = document.getElementById('gameInput');
+            
+            // Wyszukiwanie "na żywo" w trakcie wpisywania tekstu
+            inputField.addEventListener('input', searchGames);
+            
+            // Obsługa klawisza Enter
             inputField.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault(); // Zapobiega dziwnym odświeżeniom strony
-                    addGame(); // Odpala tę samą funkcję co przycisk
+                    searchGames(); 
                 }
             });
 
-            // DODANE: Automatyczne odświeżanie w tle
-            // 10000 oznacza 10 000 milisekund (czyli 10 sekund)
+            // Automatyczne odświeżanie bazy co 10 sekund
             setInterval(loadGames, 10000); 
         });
     </script>
