@@ -26,7 +26,7 @@ h2 {
 }
 
 /* Pole do wpisywania */
-#gameInput, #commentInput {
+#gameInput, #commentInput, #searchInput {
     display: block;
     width: 100%;
     max-width: 400px;
@@ -40,11 +40,11 @@ h2 {
     margin-bottom: 12px;
 }
 
-#gameInput:focus, #commentInput:focus {
+#gameInput:focus, #commentInput:focus, #searchInput:focus {
     border-color: #28a745; 
 }
 
-#gameInput::placeholder, #commentInput::placeholder {
+#gameInput::placeholder, #commentInput::placeholder, #searchInput::placeholder {
     color: #888888;
 }
 
