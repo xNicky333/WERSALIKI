@@ -12,36 +12,61 @@
     <input type="text" id="gameInput" placeholder="Nazwa gry (np. Minecraft)">
     <input type="text" id="commentInput" placeholder="Komentarz (opcjonalnie)">
     <button onclick="addGame()" id="addBtn">Dodaj grę</button>
+    
+    <br><br>
+
+    <input type="text" id="searchInput" placeholder="Szukaj gry lub komentarza...">
+
     <p id="status" style="color: gray;">Ładowanie listy...</p>
     
     <ul id="gameList"></ul>
 
     <script>
-        // Link pozostał ten sam
         const API_URL = 'https://script.google.com/macros/s/AKfycbz4ovKApyPM-TNMOP8LQU9QKpfuw-hqK3UbUChVw84xVvKEIG3GBIjNtRNkkAgdy8Xl/exec';
+
+        let allGames = []; // Przechowuje listę gier z serwera
 
         function loadGames() {
             fetch(API_URL)
                 .then(response => response.json())
                 .then(games => {
                     document.getElementById('status').innerText = '';
-                    const list = document.getElementById('gameList');
-                    
-                    let newHTML = ''; 
-                    // Przechodzimy przez każdą grę i dodajemy jej nazwę oraz komentarz
-                    games.forEach(game => {
-                        // Zabezpieczenie przed błędem, gdy ktoś da pusty komentarz
-                        const commentText = game.comment ? ` - <span style="color: #aaa; font-size: 0.9em;">${game.comment}</span>` : '';
-                        newHTML += `<li><strong>${game.name}</strong>${commentText}</li>`;
-                    });
-                    
-                    if(list.innerHTML !== newHTML) {
-                        list.innerHTML = newHTML;
-                    }
+                    allGames = games; // Zapisujemy pobrane gry do zmiennej globalnej
+                    renderGames();    // Wyświetlamy gry (uwzględniając ewentualne wyszukiwanie)
                 })
                 .catch(error => {
                     console.error('Błąd odświeżania listy w tle:', error);
                 });
+        }
+
+        // Funkcja renderująca połączona z wyszukiwarką
+        function renderGames() {
+            const searchPhrase = document.getElementById('searchInput').value.toLowerCase().trim();
+            const list = document.getElementById('gameList');
+            
+            // Filtrowanie listy
+            const filteredGames = allGames.filter(game => {
+                const gameName = game.name ? String(game.name).toLowerCase() : '';
+                const comment = game.comment ? String(game.comment).toLowerCase() : '';
+                const combinedText = `${gameName} ${comment}`;
+                return combinedText.includes(searchPhrase);
+            });
+            
+            let newHTML = ''; 
+            // Generowanie HTML dla odfiltrowanych gier
+            filteredGames.forEach(game => {
+                const commentText = game.comment ? ` - <span style="color: #aaa; font-size: 0.9em;">${game.comment}</span>` : '';
+                newHTML += `<li><strong>${game.name}</strong>${commentText}</li>`;
+            });
+            
+            // Komunikat o braku wyników
+            if (filteredGames.length === 0 && searchPhrase !== '') {
+                newHTML = '<li style="color: gray;">Brak gier pasujących do wyszukiwania...</li>';
+            }
+            
+            if(list.innerHTML !== newHTML) {
+                list.innerHTML = newHTML;
+            }
         }
 
         function addGame() {
@@ -56,7 +81,6 @@
                 btn.disabled = true;
                 btn.innerText = 'Zapisywanie...';
 
-                // Łączymy zmienne, aby wysłać grę i komentarz
                 const dataToSend = 'game=' + encodeURIComponent(gameName) + '&comment=' + encodeURIComponent(commentValue);
 
                 fetch(API_URL, {
@@ -67,7 +91,7 @@
                 .then(response => response.text())
                 .then(() => {
                     gameInput.value = ''; 
-                    commentInput.value = ''; // Czyszczenie obu pól
+                    commentInput.value = '';
                     btn.disabled = false;
                     btn.innerText = 'Dodaj grę';
                     loadGames(); 
@@ -83,15 +107,25 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadGames(); 
             
-            // Obsługa klawisza Enter dla obu pól
-            const inputs = [document.getElementById('gameInput'), document.getElementById('commentInput')];
-            inputs.forEach(input => {
+            // Obsługa klawisza Enter dla pól dodawania
+            const addInputs = [document.getElementById('gameInput'), document.getElementById('commentInput')];
+            addInputs.forEach(input => {
                 input.addEventListener('keypress', function(event) {
                     if (event.key === 'Enter') {
                         event.preventDefault(); 
                         addGame(); 
                     }
                 });
+            });
+
+            // Obsługa wpisywania i klawisza Enter dla pola wyszukiwania
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', renderGames); // Wyszukuje dynamicznie podczas pisania
+            searchInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    renderGames(); 
+                }
             });
 
             setInterval(loadGames, 10000); 
