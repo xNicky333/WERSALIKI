@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
 </head>
 <body>
+
+    <!-- PRZYCISK LOGOWANIA -->
+    <button id="loginBtn" class="login-btn">
+        <i class="fas fa-user"></i> <span id="loginText">Zaloguj</span>
+    </button>
+
     <div id="wersaliki" class="mid">
         <img src="wersal_baner_biały.png" alt="WERSALIKI" srcset="" id="foto">
     </div>
@@ -49,5 +55,30 @@
     <div class="kawa">
         <a href="https://buycoffee.to/wersaliki" target="_blank"><img src="https://buycoffee.to/static/img/share/share-button-dark.png" style="width: 293px; height: 76px" alt="Postaw nam kawę na buycoffee.to"></a>
     </div>
+
+    <!-- MODAL LOGOWANIA -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <h2>Logowanie</h2>
+            <input type="password" id="loginUser" placeholder="Login" autocomplete="username">
+            <input type="password" id="loginPass" placeholder="Hasło" autocomplete="current-password">
+            <button id="submitLogin">Zaloguj się</button>
+            <p id="loginStatus"></p>
+        </div>
+    </div>
+
+    <!-- UKRYTE MENU (widoczne dopiero po zalogowaniu) -->
+    <div id="hiddenMenu" class="hidden-menu">
+        <h2>Menu ekipy</h2>
+        <ul>
+            <li><a href="https://wersaliki.pl/lista">Górwno Horrorki</a></li>
+            <li><a href="#">Przykładowy link 2</a></li>
+            <li><a href="#">Przykładowy link 3</a></li>
+        </ul>
+        <button id="logoutBtn">Wyloguj</button>
+    </div>
+
+    <script src="skrypt.js"></script>
 </body>
 </html>
