@@ -3,57 +3,81 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwACT1SWpgXtM6wKusYz
 let crewStatus = {};
 let allReady = false;
 
-// Pobieranie danych z arkusza na starcie
+// 1. Ładujemy to, co przeglądarka zapamiętała na Twoim komputerze (żeby nie było opóźnień)
+function loadLocalState() {
+  const checkboxes = document.querySelectorAll('.crew-checkbox');
+  checkboxes.forEach(chk => {
+    const player = chk.getAttribute('data-player');
+    // Sprawdzamy lokalną pamięć
+    if (localStorage.getItem('sot_' + player) === 'true') {
+      chk.checked = true;
+      crewStatus[player] = true;
+    }
+  });
+  checkIfAllReady();
+  updateSoTTimer();
+}
+
+// 2. Pobieramy "twarde" dane z Arkusza (aby sprawdzić, co kliknęli inni gracze)
 async function loadCrewStatus() {
   try {
     const response = await fetch(SCRIPT_URL);
-    crewStatus = await response.json();
+    const sheetData = await response.json();
+    
+    // Nadpisujemy stan tym z Arkusza (bo jest ważniejszy)
+    crewStatus = sheetData;
     updateCheckboxesUI();
     checkIfAllReady();
   } catch (err) {
-    console.error("Błąd pobierania statutu załogi z Google Sheets:", err);
-    document.getElementById('sot-message').textContent = "Błąd połączenia z dziennikiem pokładowym (Arkuszem).";
+    console.error("Błąd pobierania z Google Sheets:", err);
   }
 }
 
-// Zaznaczanie checkboxów na stronie na podstawie danych z Google Sheets
+// 3. Aktualizacja checkboxów i zapis w pamięci
 function updateCheckboxesUI() {
   const checkboxes = document.querySelectorAll('.crew-checkbox');
   checkboxes.forEach(chk => {
     const player = chk.getAttribute('data-player');
-    if (crewStatus[player]) {
+    if (crewStatus[player] === true) {
       chk.checked = true;
+      localStorage.setItem('sot_' + player, 'true'); // Zapamiętaj u mnie
+    } else {
+      chk.checked = false;
+      localStorage.setItem('sot_' + player, 'false');
     }
   });
 }
 
-// Sprawdzanie czy cała 4-ka zaznaczyła
+// 4. Sprawdzanie czy cała 4-ka jest na pokładzie
 function checkIfAllReady() {
   const checkboxes = document.querySelectorAll('.crew-checkbox');
   let checkedCount = 0;
   checkboxes.forEach(chk => {
     if (chk.checked) checkedCount++;
   });
-  
   allReady = (checkedCount === 4);
 }
 
-// Nasłuchiwanie kliknięć
+// 5. Nasłuchiwanie kliknięć (akcja po zaznaczeniu ptaszka)
 document.querySelectorAll('.crew-checkbox').forEach(chk => {
   chk.addEventListener('change', async (e) => {
     const player = e.target.getAttribute('data-player');
     const status = e.target.checked;
     
-    // Aktualizujemy stronę od razu (żeby nie było laga)
+    // Aktualizujemy od razu i zapisujemy twardo w przeglądarce
     crewStatus[player] = status;
+    localStorage.setItem('sot_' + player, status);
     checkIfAllReady();
     updateSoTTimer();
 
-    // Wysyłamy zmianę do Google Sheets w tle
+    // WYSYŁKA DO ARKUSZA (dodane zabezpieczenia przed blokadą CORS)
     try {
       await fetch(SCRIPT_URL, {
         method: 'POST',
-        // Używamy plain text, bo Apps Script czasem gubi dane wysyłane jako json bez odpowiednich nagłówków
+        mode: 'no-cors', // <-- To sprawia, że Google nie zablokuje zapisu
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
         body: JSON.stringify({ player: player, status: status }) 
       });
     } catch (err) {
@@ -62,17 +86,17 @@ document.querySelectorAll('.crew-checkbox').forEach(chk => {
   });
 });
 
-// Zmodyfikowany Timer
+// 6. Główny silnik odliczania
 function updateSoTTimer() {
   const now = new Date();
   const currentYear = now.getFullYear();
 
-  const targetMonth = 11; // Grudzień
-  const targetDay = 31;   // 31 grudnia
+  const targetMonth = 11; // 11 = Grudzień
+  const targetDay = 31;   // 31 dzień
 
   let targetDate = new Date(currentYear, targetMonth, targetDay, 20, 0, 0);
 
-  // Jeśli wszyscy zaznaczyli (albo data minęła), przerzucamy timer na kolejny rok
+  // Zmiana roku, jeśli misja wykonana
   if (allReady || now > targetDate) {
     targetDate = new Date(currentYear + 1, targetMonth, targetDay, 20, 0, 0);
     if (allReady) {
@@ -83,12 +107,10 @@ function updateSoTTimer() {
   }
 
   const diff = targetDate - now;
-
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((diff / 1000 / 60) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
-
   const pad = (num) => String(num).padStart(2, '0');
 
   document.getElementById('sot-days').textContent = pad(days);
@@ -97,6 +119,7 @@ function updateSoTTimer() {
   document.getElementById('sot-seconds').textContent = pad(seconds);
 }
 
-// Uruchamiamy pobieranie bazy danych i timer
-loadCrewStatus();
+// ODPALENIE SKRYPTU
+loadLocalState(); // Zwraca natychmiast Twoje zaznaczenie z pamięci!
+loadCrewStatus(); // W tle dociąga stan reszty załogi z Google
 setInterval(updateSoTTimer, 1000);
