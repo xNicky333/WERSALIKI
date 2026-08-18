@@ -3,12 +3,11 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwACT1SWpgXtM6wKusYz
 let crewStatus = {};
 let allReady = false;
 
-// 1. Ładujemy to, co przeglądarka zapamiętała na Twoim komputerze (żeby nie było opóźnień)
+// Ładujemy to z pamięci (żeby nie było laga po wejściu)
 function loadLocalState() {
   const checkboxes = document.querySelectorAll('.crew-checkbox');
   checkboxes.forEach(chk => {
     const player = chk.getAttribute('data-player');
-    // Sprawdzamy lokalną pamięć
     if (localStorage.getItem('sot_' + player) === 'true') {
       chk.checked = true;
       crewStatus[player] = true;
@@ -18,13 +17,12 @@ function loadLocalState() {
   updateSoTTimer();
 }
 
-// 2. Pobieramy "twarde" dane z Arkusza (aby sprawdzić, co kliknęli inni gracze)
+// Pobieramy "twarde" dane od innych graczy
 async function loadCrewStatus() {
   try {
     const response = await fetch(SCRIPT_URL);
     const sheetData = await response.json();
     
-    // Nadpisujemy stan tym z Arkusza (bo jest ważniejszy)
     crewStatus = sheetData;
     updateCheckboxesUI();
     checkIfAllReady();
@@ -33,14 +31,14 @@ async function loadCrewStatus() {
   }
 }
 
-// 3. Aktualizacja checkboxów i zapis w pamięci
+// Aktualizacja UI
 function updateCheckboxesUI() {
   const checkboxes = document.querySelectorAll('.crew-checkbox');
   checkboxes.forEach(chk => {
     const player = chk.getAttribute('data-player');
     if (crewStatus[player] === true) {
       chk.checked = true;
-      localStorage.setItem('sot_' + player, 'true'); // Zapamiętaj u mnie
+      localStorage.setItem('sot_' + player, 'true');
     } else {
       chk.checked = false;
       localStorage.setItem('sot_' + player, 'false');
@@ -48,7 +46,6 @@ function updateCheckboxesUI() {
   });
 }
 
-// 4. Sprawdzanie czy cała 4-ka jest na pokładzie
 function checkIfAllReady() {
   const checkboxes = document.querySelectorAll('.crew-checkbox');
   let checkedCount = 0;
@@ -58,35 +55,28 @@ function checkIfAllReady() {
   allReady = (checkedCount === 4);
 }
 
-// 5. Nasłuchiwanie kliknięć (akcja po zaznaczeniu ptaszka)
+// Nasłuchiwanie kliknięć
 document.querySelectorAll('.crew-checkbox').forEach(chk => {
   chk.addEventListener('change', async (e) => {
     const player = e.target.getAttribute('data-player');
     const status = e.target.checked;
     
-    // Aktualizujemy od razu i zapisujemy twardo w przeglądarce
+    // Aktualizujemy własną przeglądarkę
     crewStatus[player] = status;
     localStorage.setItem('sot_' + player, status);
     checkIfAllReady();
     updateSoTTimer();
 
-    // WYSYŁKA DO ARKUSZA (dodane zabezpieczenia przed blokadą CORS)
+    // TOTALNIE NOWY SPOSÓB WYSYŁKI - Niezawodny GET, przeglądarka tego nie zablokuje!
     try {
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors', // <-- To sprawia, że Google nie zablokuje zapisu
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({ player: player, status: status }) 
-      });
+      const updateUrl = SCRIPT_URL + `?action=update&player=${encodeURIComponent(player)}&status=${status}`;
+      await fetch(updateUrl);
     } catch (err) {
       console.error("Błąd zapisu do arkusza:", err);
     }
   });
 });
 
-// 6. Główny silnik odliczania
 function updateSoTTimer() {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -96,11 +86,10 @@ function updateSoTTimer() {
 
   let targetDate = new Date(currentYear, targetMonth, targetDay, 20, 0, 0);
 
-  // Zmiana roku, jeśli misja wykonana
   if (allReady || now > targetDate) {
     targetDate = new Date(currentYear + 1, targetMonth, targetDay, 20, 0, 0);
     if (allReady) {
-      document.getElementById('sot-message').innerHTML = "<span style='color: #d946ef; font-weight: bold;'>Rejs w tym roku odbyty! Czekamy na kolejny sezon.</span>";
+      document.getElementById('sot-message').innerHTML = "<span style='color: #d946ef; font-weight: bold;'>Misja na ten rok wykonana! Czekamy na kolejny sezon.</span>";
     }
   } else {
     document.getElementById('sot-message').textContent = "Czas wypłynąć na szerokie wody!";
@@ -119,7 +108,7 @@ function updateSoTTimer() {
   document.getElementById('sot-seconds').textContent = pad(seconds);
 }
 
-// ODPALENIE SKRYPTU
-loadLocalState(); // Zwraca natychmiast Twoje zaznaczenie z pamięci!
-loadCrewStatus(); // W tle dociąga stan reszty załogi z Google
+// ODPALENIE
+loadLocalState(); 
+loadCrewStatus(); 
 setInterval(updateSoTTimer, 1000);
