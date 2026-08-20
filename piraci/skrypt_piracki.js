@@ -25,7 +25,8 @@ function renderLoginNote() {
 
 async function loadCrewStatus() {
   try {
-    const response = await fetch(SCRIPT_URL);
+    const timestamp = new Date().getTime();
+    const response = await fetch(`${SCRIPT_URL}?t=${timestamp}`);
     const data = await response.json();
     crewStatus = data.players || {};
     statusYear = data.year || new Date().getFullYear();
@@ -61,7 +62,8 @@ document.querySelectorAll('.crew-checkbox').forEach(chk => {
     updateDisplay();
 
     try {
-      const url = `${SCRIPT_URL}?action=update&player=${encodeURIComponent(player)}&status=${newStatus}&user=${encodeURIComponent(loggedInUser)}`;
+      const timestamp = new Date().getTime();
+      const url = `${SCRIPT_URL}?action=update&player=${encodeURIComponent(player)}&status=${newStatus}&user=${encodeURIComponent(loggedInUser)}&t=${timestamp}`;
       const response = await fetch(url);
       const result = await response.json();
 
