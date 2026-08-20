@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEA OF THIEVES IS COMING</title>
+
+    <link rel="shortcut icon" href="kitty.png" type="image/x-icon">
+    <link rel="stylesheet" href="sea_style.css">
+</head>
+<body>
+
+  <a href="/" id="backBtn">Wróć</a>
+    <div class="sot-timer-container">
+      <h3 class="sot-title">🏴‍☠️ Kierunek: Sea of Thieves 🏴‍☠️</h3>
+
+      <div id="sot-timer" class="sot-timer">
+        <div class="timer-box">
+          <span id="sot-days">00</span>
+          <span class="timer-label">Dni</span>
+        </div>
+        <div class="timer-box">
+          <span id="sot-hours">00</span>
+          <span class="timer-label">Godz.</span>
+        </div>
+        <div class="timer-box">
+          <span id="sot-minutes">00</span>
+          <span class="timer-label">Min.</span>
+        </div>
+        <div class="timer-box">
+          <span id="sot-seconds">00</span>
+          <span class="timer-label">Sek.</span>
+        </div>
+      </div>
+
+      <p id="sot-message" class="sot-status-text">Wczytywanie statusu załogi...</p>
+      <p id="sot-comeback" class="sot-comeback" style="display:none;"></p>
+
+      <!-- Checkboxy załogi -->
+      <div class="crew-section">
+        <h4 class="crew-title">Gotowość załogi na ten rok:</h4>
+        <div class="crew-list">
+          <label class="crew-label">
+            <input type="checkbox" class="crew-checkbox" data-player="Nicky">
+            <span class="custom-chk"></span> Nicky
+          </label>
+          <label class="crew-label">
+            <input type="checkbox" class="crew-checkbox" data-player="Zreku">
+            <span class="custom-chk"></span> Zreku
+          </label>
+          <label class="crew-label">
+            <input type="checkbox" class="crew-checkbox" data-player="Północny">
+            <span class="custom-chk"></span> Północny
+          </label>
+          <label class="crew-label">
+            <input type="checkbox" class="crew-checkbox" data-player="Michalotse">
+            <span class="custom-chk"></span> Michalotse
+          </label>
+        </div>
+        <p id="loginNote" class="login-note"></p>
+      </div>
+    </div>
+
+    <script src="skrypt_piracki.js"></script>
+</body>
+</html>
