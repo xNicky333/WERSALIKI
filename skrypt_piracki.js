@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvd5VOmnGB1pfrH-WqQs8QvyzuL7yB5AZApvunFVoXBn3YfDH2_L_vs_JYOzEpLg4I/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwACT1SWpgXtM6wKusYzka8JSGAVYRlrhsVvbR7NOtVhKmvN8mP3gHHHVI3XZdDj7ms/exec';
 const PLAYERS = ['Nicky', 'Zreku', 'Północny', 'Michalotse'];
 
 let crewStatus = {};   // dane z serwera { Nicky: true/false, ... }
