@@ -12,7 +12,7 @@ const myIdentity = PLAYERS.find(p => p.toLowerCase() === (loggedInUser || '').to
 
 function renderLoginNote() {
   const note = document.getElementById('loginNote');
-  if (!loggedInUser) {
+  if (loggedInUser) {
     note.innerHTML = 'Nie jesteś zalogowany/a — <a href="/">zaloguj się na stronie głównej</a>, żeby móc zaznaczyć swoją gotowość.';
   } else if (!myIdentity) {
     note.textContent = `Zalogowano jako "${loggedInUser}", ale to imię nie pasuje do żadnego gracza z listy.`;
