@@ -1,101 +1,114 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwACT1SWpgXtM6wKusYzka8JSGAVYRlrhsVvbR7NOtVhKmvN8mP3gHHHVI3XZdDj7ms/exec';
+const PLAYERS = ['Nicky', 'Zreku', 'Północny', 'Michalotse'];
 
-let crewStatus = {};
-let allReady = false;
+let crewStatus = {};   // dane z serwera { Nicky: true/false, ... }
+let statusYear = null; // rok, dla którego serwer zwrócił dane
 
-// Ładujemy to z pamięci (żeby nie było laga po wejściu)
-function loadLocalState() {
-  const checkboxes = document.querySelectorAll('.crew-checkbox');
-  checkboxes.forEach(chk => {
-    const player = chk.getAttribute('data-player');
-    if (localStorage.getItem('sot_' + player) === 'true') {
-      chk.checked = true;
-      crewStatus[player] = true;
-    }
-  });
-  checkIfAllReady();
-  updateSoTTimer();
-}
+// Ten sam klucz localStorage, którego używa system logowania na stronie głównej
+const loggedInUser = localStorage.getItem('wersaliki_user');
+const myIdentity = PLAYERS.find(p => p.toLowerCase() === (loggedInUser || '').toLowerCase()) || null;
 
-// Pobieramy "twarde" dane od innych graczy
-async function loadCrewStatus() {
-  try {
-    const response = await fetch(SCRIPT_URL);
-    const sheetData = await response.json();
-    
-    crewStatus = sheetData;
-    updateCheckboxesUI();
-    checkIfAllReady();
-  } catch (err) {
-    console.error("Błąd pobierania z Google Sheets:", err);
+/* ---------------- INFORMACJA O STATUSIE LOGOWANIA ---------------- */
+
+function renderLoginNote() {
+  const note = document.getElementById('loginNote');
+  if (!loggedInUser) {
+    note.innerHTML = 'Nie jesteś zalogowany/a — <a href="/">zaloguj się na stronie głównej</a>, żeby móc zaznaczyć swoją gotowość.';
+  } else if (!myIdentity) {
+    note.textContent = `Zalogowano jako "${loggedInUser}", ale to imię nie pasuje do żadnego gracza z listy.`;
+  } else {
+    note.textContent = `Zalogowano jako: ${myIdentity}`;
   }
 }
 
-// Aktualizacja UI
-function updateCheckboxesUI() {
-  const checkboxes = document.querySelectorAll('.crew-checkbox');
-  checkboxes.forEach(chk => {
+/* ---------------- DANE Z SERWERA ---------------- */
+
+async function loadCrewStatus() {
+  try {
+    const response = await fetch(SCRIPT_URL);
+    const data = await response.json();
+    crewStatus = data.players || {};
+    statusYear = data.year || new Date().getFullYear();
+  } catch (err) {
+    console.error('Błąd pobierania z Google Sheets:', err);
+  }
+  renderCrew();
+  updateDisplay();
+}
+
+function renderCrew() {
+  document.querySelectorAll('.crew-checkbox').forEach(chk => {
     const player = chk.getAttribute('data-player');
-    if (crewStatus[player] === true) {
-      chk.checked = true;
-      localStorage.setItem('sot_' + player, 'true');
-    } else {
-      chk.checked = false;
-      localStorage.setItem('sot_' + player, 'false');
-    }
+    chk.checked = crewStatus[player] === true;
+    chk.disabled = (player !== myIdentity); // tylko checkbox zalogowanego gracza jest klikalny
   });
 }
 
-function checkIfAllReady() {
-  const checkboxes = document.querySelectorAll('.crew-checkbox');
-  let checkedCount = 0;
-  checkboxes.forEach(chk => {
-    if (chk.checked) checkedCount++;
-  });
-  allReady = (checkedCount === 4);
+function allReady() {
+  return PLAYERS.every(p => crewStatus[p] === true);
 }
 
-// Nasłuchiwanie kliknięć
+/* ---------------- OBSŁUGA KLIKNIĘĆ ---------------- */
+
 document.querySelectorAll('.crew-checkbox').forEach(chk => {
   chk.addEventListener('change', async (e) => {
     const player = e.target.getAttribute('data-player');
-    const status = e.target.checked;
-    
-    // Aktualizujemy własną przeglądarkę
-    crewStatus[player] = status;
-    localStorage.setItem('sot_' + player, status);
-    checkIfAllReady();
-    updateSoTTimer();
+    if (player !== myIdentity) return; // dodatkowe zabezpieczenie w JS
 
-    // TOTALNIE NOWY SPOSÓB WYSYŁKI - Niezawodny GET, przeglądarka tego nie zablokuje!
+    const newStatus = e.target.checked;
+    const previous = crewStatus[player];
+    crewStatus[player] = newStatus; // optymistyczna aktualizacja UI
+    updateDisplay();
+
     try {
-      const updateUrl = SCRIPT_URL + `?action=update&player=${encodeURIComponent(player)}&status=${status}`;
-      await fetch(updateUrl);
+      const url = `${SCRIPT_URL}?action=update&player=${encodeURIComponent(player)}&status=${newStatus}&user=${encodeURIComponent(loggedInUser)}`;
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (!result.success) {
+        crewStatus[player] = previous;
+        e.target.checked = previous;
+        alert('Nie udało się zapisać zmiany — spróbuj się zalogować ponownie.');
+        updateDisplay();
+      }
     } catch (err) {
-      console.error("Błąd zapisu do arkusza:", err);
+      console.error('Błąd zapisu do arkusza:', err);
+      crewStatus[player] = previous;
+      e.target.checked = previous;
+      updateDisplay();
     }
   });
 });
 
-function updateSoTTimer() {
+/* ---------------- LICZNIK / STAN MISJI ---------------- */
+
+function updateDisplay() {
   const now = new Date();
   const currentYear = now.getFullYear();
+  const missionDone = allReady() && statusYear === currentYear;
 
-  const targetMonth = 11; // 11 = Grudzień
-  const targetDay = 31;   // 31 dzień
+  const timerEl = document.getElementById('sot-timer');
+  const crewSection = document.querySelector('.crew-section');
+  const comebackEl = document.getElementById('sot-comeback');
+  const messageEl = document.getElementById('sot-message');
 
-  let targetDate = new Date(currentYear, targetMonth, targetDay, 20, 0, 0);
-
-  if (allReady || now > targetDate) {
-    targetDate = new Date(currentYear + 1, targetMonth, targetDay, 20, 0, 0);
-    if (allReady) {
-      document.getElementById('sot-message').innerHTML = "<span style='color: #d946ef; font-weight: bold;'>Misja na ten rok wykonana! Czekamy na kolejny sezon.</span>";
-    }
-  } else {
-    document.getElementById('sot-message').textContent = "Czas wypłynąć na szerokie wody!";
+  if (missionDone) {
+    timerEl.style.display = 'none';
+    crewSection.style.display = 'none';
+    comebackEl.style.display = 'block';
+    comebackEl.textContent = `Coming back in ${currentYear + 1}`;
+    messageEl.textContent = 'Misja na ten rok wykonana! Czekamy na kolejny sezon.';
+    return;
   }
 
-  const diff = targetDate - now;
+  timerEl.style.display = 'flex';
+  crewSection.style.display = 'block';
+  comebackEl.style.display = 'none';
+  messageEl.textContent = 'Czas wypłynąć na szerokie wody!';
+
+  const targetDate = new Date(currentYear, 11, 31, 23, 59, 59);
+  const diff = Math.max(0, targetDate - now);
+
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((diff / 1000 / 60) % 60);
@@ -108,7 +121,9 @@ function updateSoTTimer() {
   document.getElementById('sot-seconds').textContent = pad(seconds);
 }
 
-// ODPALENIE
-loadLocalState(); 
-loadCrewStatus(); 
-setInterval(updateSoTTimer, 1000);
+/* ---------------- START ---------------- */
+
+renderLoginNote();
+loadCrewStatus();
+setInterval(updateDisplay, 1000);
+setInterval(loadCrewStatus, 15000);

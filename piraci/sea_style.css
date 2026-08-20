@@ -186,3 +186,19 @@ body::before {
     background-color: #333333; /* Jaśniejszy szary po najechaniu */
     border-color: #555555;
 }
+/* --- "COMING BACK IN XXXX" --- */
+.sot-comeback {
+  font-size: 1.4rem; font-weight: 700; color: #f43f5e;
+  text-shadow: 0 0 15px rgba(244, 63, 94, 0.7);
+  margin-top: 10px;
+}
+
+/* --- BLOKADA CUDZYCH CHECKBOXÓW / NOTKA O LOGOWANIU --- */
+.crew-label:has(input:disabled) { cursor: not-allowed; opacity: 0.5; }
+
+.login-note {
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: #a855f7;
+}
+.login-note a { color: #e879f9; }
