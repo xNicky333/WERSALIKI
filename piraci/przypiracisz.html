@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEA OF THIEVES IS COMING</title>
-
+    
     <link rel="shortcut icon" href="kitty.png" type="image/x-icon">
-    <link rel="stylesheet" href="sea_style.css">
+    <link rel="stylesheet" href="sea_style.css"> 
 </head>
-<body>
+<body>  
 
   <a href="/" id="backBtn">Wróć</a>
     <div class="sot-timer-container">
@@ -33,11 +33,14 @@
         </div>
       </div>
 
-      <p id="sot-message" class="sot-status-text">Wczytywanie statusu załogi...</p>
-      <p id="sot-comeback" class="sot-comeback" style="display:none;"></p>
+      <!-- Pojawia się zamiast zegara, gdy cała załoga jest gotowa -->
+      <p id="sot-comeback" class="sot-comeback"></p>
 
-      <!-- Checkboxy załogi -->
-      <div class="crew-section">
+      <p id="sot-message" class="sot-status-text">Wczytywanie statusu załogi...</p>
+      <p id="sot-login-hint" class="sot-login-hint"></p>
+
+      <!-- Nowa sekcja: Checkboxy załogi -->
+      <div class="crew-section" id="crewSection">
         <h4 class="crew-title">Gotowość załogi na ten rok:</h4>
         <div class="crew-list">
           <label class="crew-label">
@@ -57,10 +60,10 @@
             <span class="custom-chk"></span> Michalotse
           </label>
         </div>
-        <p id="loginNote" class="login-note"></p>
       </div>
     </div>
 
+    <!-- Skrypt zawsze na dole -->
     <script src="skrypt_piracki.js"></script>
 </body>
 </html>
